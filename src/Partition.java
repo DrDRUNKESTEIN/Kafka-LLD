@@ -14,5 +14,5 @@ abstract public class Partition {
         this.name = name;
     }
     public abstract Integer GetValue();
-    public abstract void AddValue(Integer value);
+    public abstract Integer AddValue(Integer value);
 }

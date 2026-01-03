@@ -32,6 +32,13 @@ public class Main {
         broker.publish(producer3, topic3, 300);
         broker.publish(producer2, topic2, 200);
         broker.publish(producer1, topic1, 100);
+    // produce more messages to see offsets
+    broker.publish(producer1, topic1, 101);
+    broker.publish(producer1, topic1, 102);
+    broker.publish(producer3, topic3, 301);
+    // Query broker mapping
+    System.out.println("Location for Topic-1 offset 0: " + broker.getLocationForOffset("Topic-1", 0));
+    System.out.println("All offsets for Topic-1: " + broker.getAllOffsetsForTopic("Topic-1"));
         broker.consume(consumer1, topic3);
         broker.consume(consumer2, topic3);
         // for(Consumer consumer:consumerGroup1.getConsumers()){

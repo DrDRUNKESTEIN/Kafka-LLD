@@ -1,5 +1,10 @@
 package src;
 
+
+//How do we make sure multiple partitions are created and maintained for the same topic?
+//Delegate this to the brokre-> broker is responsible for writing to a specific partition in the topic and 
+//maintaining the information of the topic on the given offset
+
 public class Topic {
     private Integer id;
     private String name;

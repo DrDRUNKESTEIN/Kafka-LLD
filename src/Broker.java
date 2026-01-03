@@ -1,12 +1,19 @@
 package src;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Broker {
     private Integer id;
     private String name;
     private List<Topic> topics;
+    // Map to track, for each topic name, which offset is stored in which partition (location)
+    // topicName -> (offset -> partitionName)
+    private Map<String, Map<Integer, String>> topicOffsetLocationMap = new HashMap<>();
+
+    
     public List<Topic> getTopics() {
         return topics;
     }
@@ -55,7 +62,30 @@ public class Broker {
         System.out.println("Consumer " + consumer.getName() + " is not part of any consumer group subscribed to topic: " + topic.getName());
     }
     public void publish(Producer producer, Topic topic, Integer value){
-        producer.produce(topic, value);
-        System.out.println("Producer " + producer.getName() + " produced value: " + value + " to topic: " + topic.getName());
+        Integer offset = producer.produce(topic, value);
+        // record mapping topic -> offset -> partition name
+        if (offset != null && offset >= 0) {
+            this.recordOffsetLocation(topic.getName(), offset, topic.getPartition().getName());
+        }
+        System.out.println("Producer " + producer.getName() + " produced value: " + value + " to topic: " + topic.getName() + " offset: " + offset);
+    }
+
+    private void recordOffsetLocation(String topicName, Integer offset, String partitionName) {
+        Map<Integer, String> offsets = this.topicOffsetLocationMap.get(topicName);
+        if (offsets == null) {
+            offsets = new HashMap<>();
+            this.topicOffsetLocationMap.put(topicName, offsets);
+        }
+        offsets.put(offset, partitionName);
+    }
+
+    public String getLocationForOffset(String topicName, Integer offset) {
+        Map<Integer, String> offsets = this.topicOffsetLocationMap.get(topicName);
+        if (offsets == null) return null;
+        return offsets.get(offset);
+    }
+
+    public Map<Integer, String> getAllOffsetsForTopic(String topicName) {
+        return this.topicOffsetLocationMap.get(topicName);
     }
 }

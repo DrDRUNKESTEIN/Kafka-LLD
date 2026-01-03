@@ -19,7 +19,7 @@ public class Producer {
     public void setName(String name) {
         this.name = name;
     }
-    public void produce(Topic topic, Integer value){
-        topic.getPartition().AddValue(value);
+    public Integer produce(Topic topic, Integer value){
+        return topic.getPartition().AddValue(value);
     }
 }
