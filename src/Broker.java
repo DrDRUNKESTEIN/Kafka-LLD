@@ -1,9 +1,9 @@
 package src;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Broker {
     private Integer id;
@@ -11,7 +11,7 @@ public class Broker {
     private List<Topic> topics;
     // Map to track, for each topic name, which offset is stored in which partition (location)
     // topicName -> (offset -> partitionName)
-    private Map<String, Map<Integer, String>> topicOffsetLocationMap = new HashMap<>();
+    private Map<String, Map<Integer, String>> topicOffsetLocationMap = new ConcurrentHashMap<>();
 
     
     public List<Topic> getTopics() {
@@ -71,11 +71,7 @@ public class Broker {
     }
 
     private void recordOffsetLocation(String topicName, Integer offset, String partitionName) {
-        Map<Integer, String> offsets = this.topicOffsetLocationMap.get(topicName);
-        if (offsets == null) {
-            offsets = new HashMap<>();
-            this.topicOffsetLocationMap.put(topicName, offsets);
-        }
+        Map<Integer, String> offsets = this.topicOffsetLocationMap.computeIfAbsent(topicName, k -> new ConcurrentHashMap<>());
         offsets.put(offset, partitionName);
     }
 

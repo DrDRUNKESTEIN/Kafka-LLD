@@ -1,21 +1,20 @@
 package src;
 
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class QueuePartition extends Partition {
-    private Integer queueLength;
     private Queue<Integer> queue;
     // simple monotonically increasing offset for this partition
-    private long nextOffset = 0L;
+    private AtomicLong nextOffset = new AtomicLong(0L);
     public Integer getQueueLength() {
-        return queueLength;
+        return this.queue.size();
     }
     public QueuePartition(Integer id, String name) {
         this.setId(id);
         this.setName(name);
-        this.queueLength = 0;
-        this.queue = new LinkedList<>();
+        this.queue = new ConcurrentLinkedQueue<>();
     }
     public Queue<Integer> getQueue() {
         return queue;
@@ -24,18 +23,13 @@ public class QueuePartition extends Partition {
         this.queue = queue;
     }
     public void setQueueLength(Integer queueLength) {
-        this.queueLength = queueLength;
+        // not used with concurrent queue
     }
     public void enqueue(Integer item){
         this.queue.add(item);
-        this.queueLength += 1;
-        this.nextOffset += 1;
+        this.nextOffset.incrementAndGet();
     }
     private Integer dequeue(){
-        if(this.queueLength == 0){
-            return null;
-        }
-        this.queueLength -= 1;
         return this.queue.poll();
     }
 
@@ -45,16 +39,15 @@ public class QueuePartition extends Partition {
     }
     public Integer AddValue(Integer value) {
         this.enqueue(value);
-        // Return the offset (use Integer if small, but offset is long; cast to Integer if safe)
-        // We'll return the offset as Integer if within Integer range, else return -1 to signal overflow.
-        if (this.nextOffset <= Integer.MAX_VALUE) {
-            return (int)(this.nextOffset - 1);
+        long assigned = this.nextOffset.get() - 1;
+        if (assigned <= Integer.MAX_VALUE && assigned >= Integer.MIN_VALUE) {
+            return (int) assigned;
         } else {
             return -1;
         }
     } 
 
     public long getNextOffset() {
-        return nextOffset;
+        return nextOffset.get();
     }
 }
