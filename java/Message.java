@@ -1,14 +1,18 @@
 package java;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-public class Message {
-    private byte[] payload;
-    private AtomicInteger offset;
-    private int timestamp;
-    public Message(byte[] payload, AtomicInteger offset, int timestamp){
-        this.payload=payload;
+public class Message{
+    private byte[] message;
+    private Integer offset=-1;
+    private long timestamp;
+    public Message(byte[] message, Integer offset, long timestamp){
+        this.message=message;
         this.offset=offset;
         this.timestamp=timestamp;
+    }
+    public Integer getOffset() {
+        return offset;
+    }
+    public byte[] getMessageBytes() {
+        return this.message;
     }
 }
